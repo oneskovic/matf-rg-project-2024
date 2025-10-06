@@ -19,8 +19,10 @@ protected:
     void begin_draw() override;
     void end_draw() override;
     void draw() override;
+    void update() override;
 
 private:
+    void update_camera();
     engine::resources::Shader *shader;
     engine::resources::Model *triangle_model;
 };

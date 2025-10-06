@@ -4,6 +4,10 @@
       "triangle": {
         "path": "triangle.obj",
         "flip_uvs": false
+      },
+      "bunny": {
+        "path": "bunny.obj",
+        "flip_uvs": false
       }
     }
   },
