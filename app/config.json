@@ -8,6 +8,10 @@
       "bunny": {
         "path": "bunny.obj",
         "flip_uvs": false
+      },
+      "cube": {
+        "path": "cube.obj",
+        "flip_uvs": false
       }
     }
   },

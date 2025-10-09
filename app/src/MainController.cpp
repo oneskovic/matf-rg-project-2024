@@ -10,6 +10,8 @@ using namespace engine::graphics;
 
 void MainController::initialize() {
     OpenGL::enable_depth_testing();
+    light_position = glm::vec3(2.0f, 2.0f, 2.0f);
+    light_color = glm::vec3(1.0f, 1.0f, 1.0f);
 }
 
 void MainController::begin_draw() {
@@ -17,7 +19,6 @@ void MainController::begin_draw() {
 }
 
 void MainController::draw() {
-    triangle_model = get<engine::resources::ResourcesController>()->model("triangle");
     auto bunny = get<engine::resources::ResourcesController>()->model("bunny");
     shader = get<engine::resources::ResourcesController>()->shader("triangle");
     auto graphics_controller = get<GraphicsController>();
@@ -36,8 +37,8 @@ void MainController::draw() {
     shader->set_vec3("dirLightColor",glm::vec3(1.0f, 1.0f, 1.0f));
 
     // Point light
-    shader->set_vec3("pointLightPos",   glm::vec3(2.0f, 2.0f, 2.0f));
-    shader->set_vec3("pointLightColor", glm::vec3(1.0f, 0.95f, 0.9f));
+    shader->set_vec3("pointLightPos",  light_position);
+    shader->set_vec3("pointLightColor", light_color);
 
     // Attenuation
     shader->set_float("pointKc", 1.0f);
@@ -45,9 +46,12 @@ void MainController::draw() {
     shader->set_float("pointKq", 0.032f);
 
     bunny->draw(shader);
+    render_light();
 }
+
 void MainController::update() {
     update_camera();
+    update_light();
 }
 
 void MainController::update_camera() {
@@ -74,6 +78,42 @@ void MainController::update_camera() {
     camera->rotate_camera(mouse.dx, mouse.dy);
     camera->zoom(mouse.scroll);
 }
+void MainController::update_light() {
+    auto platform = get<engine::platform::PlatformController>();
+    float dt = platform->dt();
+    if (platform->key(engine::platform::KEY_UP)
+                .state() == engine::platform::Key::State::Pressed) {
+        light_position += glm::vec3(0,1,0)*dt;
+                }
+    if (platform->key(engine::platform::KEY_DOWN)
+                .state() == engine::platform::Key::State::Pressed) {
+        light_position += glm::vec3(0,-1,0)*dt;
+                }
+    if (platform->key(engine::platform::KEY_LEFT)
+                .state() == engine::platform::Key::State::Pressed) {
+        light_position += glm::vec3(1,0,0)*dt;
+                }
+    if (platform->key(engine::platform::KEY_RIGHT)
+                .state() == engine::platform::Key::State::Pressed) {
+        light_position += glm::vec3(-1,0,0)*dt;
+                }
+}
+void MainController::render_light() {
+    auto cube = get<engine::resources::ResourcesController>()->model("cube");
+    auto lightShader = get<engine::resources::ResourcesController>()->shader("light");
+    auto graphics_controller = get<GraphicsController>();
+
+    auto model = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f));
+    model = glm::translate(model, light_position);
+
+    lightShader->use();
+    lightShader->set_mat4("model", model);
+    lightShader->set_mat4("view", graphics_controller->camera()->view_matrix());
+    lightShader->set_mat4("projection", graphics_controller->projection_matrix());
+    lightShader->set_vec3("lightColor", light_color);
+    cube->draw(lightShader);
+}
+
 
 void MainController::end_draw() {
     auto platform = get<engine::platform::PlatformController>();

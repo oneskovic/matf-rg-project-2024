@@ -23,6 +23,10 @@ protected:
 
 private:
     void update_camera();
+    void update_light();
+    void render_light();
+    glm::vec3 light_position;
+    glm::vec3 light_color;
     engine::resources::Shader *shader;
     engine::resources::Model *triangle_model;
 };
