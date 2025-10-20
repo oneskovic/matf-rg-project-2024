@@ -27,6 +27,7 @@ private:
     void render_light();
     glm::vec3 light_position;
     glm::vec3 light_color;
+    glm::mat4 lamp_post_model_matrix;
     engine::resources::Shader *shader;
     engine::resources::Model *triangle_model;
 };

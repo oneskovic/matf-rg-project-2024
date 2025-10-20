@@ -12,6 +12,10 @@
       "cube": {
         "path": "cube.obj",
         "flip_uvs": false
+      },
+      "lamp_post": {
+        "path": "lamp_post.obj",
+        "flip_uvs": false
       }
     }
   },
