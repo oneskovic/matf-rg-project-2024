@@ -15,6 +15,8 @@ public:
 
 private:
     int SCR_WIDTH, SCR_HEIGHT;
+    float exposure = 1.0f;
+    float gamma = 2.2f;
     unsigned int framebuffer;
     unsigned int intermediateFBO;
     unsigned int quadVAO;

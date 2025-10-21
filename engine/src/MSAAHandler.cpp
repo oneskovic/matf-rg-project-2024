@@ -49,7 +49,7 @@ int MSAAHandler::init_msaa(int SCR_WIDTH, int SCR_HEIGHT) {
     unsigned int textureColorBufferMultiSampled;
     CHECKED_GL_CALL(glGenTextures, 1, &textureColorBufferMultiSampled);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D_MULTISAMPLE, textureColorBufferMultiSampled);
-    CHECKED_GL_CALL(glTexImage2DMultisample, GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
+    CHECKED_GL_CALL(glTexImage2DMultisample, GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D_MULTISAMPLE, 0);
     CHECKED_GL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, textureColorBufferMultiSampled, 0);
     // create a (also multisampled) renderbuffer object for depth and stencil attachments
@@ -71,7 +71,7 @@ int MSAAHandler::init_msaa(int SCR_WIDTH, int SCR_HEIGHT) {
     // create a color attachment texture
     CHECKED_GL_CALL(glGenTextures, 1, &screenTexture);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, screenTexture);
-    CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, nullptr);
     CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     CHECKED_GL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0); // we only need a color buffer
@@ -106,7 +106,12 @@ void MSAAHandler::msaa_draw() const {
     CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
     CHECKED_GL_CALL(glDisable, GL_DEPTH_TEST);
 
+    CHECKED_GL_CALL(glDisable, GL_FRAMEBUFFER_SRGB);
     screenShader->use();
+    screenShader->set_int("screenTexture", 0);
+    screenShader->set_float("exposure", exposure);
+    screenShader->set_float("gamma", gamma);
+
     CHECKED_GL_CALL(glBindVertexArray, quadVAO);
     CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, screenTexture);
