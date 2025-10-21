@@ -1,4 +1,5 @@
 #pragma once
+#include "engine/graphics/MSAAHandler.hpp"
 #include "engine/resources/Model.hpp"
 #include "engine/resources/Shader.hpp"
 
@@ -30,4 +31,5 @@ private:
     glm::mat4 lamp_post_model_matrix;
     engine::resources::Shader *shader;
     engine::resources::Model *triangle_model;
+    std::unique_ptr<engine::graphics::MSAAHandler> msaa_handler;
 };

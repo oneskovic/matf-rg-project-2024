@@ -15,10 +15,13 @@ void MainController::initialize() {
     light_position = glm::vec3(3.0f, 0.5f, 2.75f);
     light_color = glm::vec3(1.0f, 1.0f, 1.0f);
     lamp_post_model_matrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(3,0,3)), glm::vec3(0.1,0.1,0.1));
+    msaa_handler = std::make_unique<MSAAHandler>();
+    msaa_handler->init_msaa(800, 600);
 }
 
 void MainController::begin_draw() {
     OpenGL::clear_buffers();
+    msaa_handler->msaa_redirect();
 }
 
 void MainController::draw() {
@@ -127,6 +130,8 @@ void MainController::render_light() {
 
 
 void MainController::end_draw() {
+    msaa_handler->blit_framebuffer_to_intermediate();
+    msaa_handler->msaa_draw();
     auto platform = get<engine::platform::PlatformController>();
     platform->swap_buffers();
 }
