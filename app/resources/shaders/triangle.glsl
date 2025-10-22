@@ -28,6 +28,9 @@ out vec4 FragColor;
 
 in vec3 Normal;
 in vec3 FragPos;
+in vec2 TexCoords;
+
+uniform sampler2D uDiffuseMap;
 
 uniform vec3 objectColor;
 uniform vec3 ambientColor;
@@ -57,7 +60,8 @@ void main()
     vec3 pointTerm = diffPt * pointLightColor * atten;
 
     vec3 lighting = ambientColor + dirTerm + pointTerm;
-    vec3 color = lighting * objectColor;
+
+    vec3 color = lighting * texture(uDiffuseMap, TexCoords).rgb;
 
     FragColor = vec4(color, 1.0);
 }
