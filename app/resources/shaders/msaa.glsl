@@ -14,6 +14,8 @@ out vec4 FragColor;
 in vec2 TexCoords;
 
 uniform sampler2D screenTexture;
+uniform sampler2D bloomTex;
+uniform float bloomIntensity;
 uniform float exposure;
 uniform float gamma;
 
@@ -22,10 +24,12 @@ vec3 aces(vec3 x) {
     return clamp((x*(2.51*x + 0.03)) / (x*(2.43*x + 0.59) + 0.14), 0.0, 1.0);
 }
 
-void main() {
-    vec3 hdr = texture(screenTexture, TexCoords).rgb;
-    hdr = vec3(1.0) - exp(-hdr * exposure);
+void main(){
+    vec3 sceneHdr = texture(screenTexture, TexCoords).rgb;
+    vec3 bloomHdr = texture(bloomTex, TexCoords).rgb;
+
+    vec3 hdr = sceneHdr + bloomHdr * bloomIntensity;
+    hdr *= exposure;
     vec3 mapped = aces(hdr);
-    mapped = pow(mapped, vec3(1.0 / gamma));
     FragColor = vec4(mapped, 1.0);
 }

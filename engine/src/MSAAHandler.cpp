@@ -16,6 +16,9 @@ int MSAAHandler::init_msaa(int SCR_WIDTH, int SCR_HEIGHT) {
     this->SCR_HEIGHT = SCR_HEIGHT;
 
     screenShader = core::Controller::get<resources::ResourcesController>()->shader("msaa");
+    brightShader = core::Controller::get<resources::ResourcesController>()->shader("bloom_bright");
+    blurShader = core::Controller::get<resources::ResourcesController>()->shader("bloom_blur");
+
 
     float quadVertices[] = {   // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // positions   // texCoords
@@ -81,8 +84,83 @@ int MSAAHandler::init_msaa(int SCR_WIDTH, int SCR_HEIGHT) {
     }
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 
+    init_bloom();
     return framebuffer;
 }
+
+void MSAAHandler::init_bloom() {
+    // Bright-pass FBO and texture
+    CHECKED_GL_CALL(glGenFramebuffers, 1, &brightFBO);
+    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, brightFBO);
+
+    CHECKED_GL_CALL(glGenTextures, 1, &brightTex);
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, brightTex);
+    CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, nullptr);
+    CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    CHECKED_GL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brightTex, 0);
+    RG_GUARANTEE(glCheckFramebufferStatus(GL_FRAMEBUFFER)==GL_FRAMEBUFFER_COMPLETE, "brightFBO incomplete");
+
+    // Ping-pong FBOs
+    CHECKED_GL_CALL(glGenFramebuffers, 2, pingFBO);
+    CHECKED_GL_CALL(glGenTextures, 2, pingTex);
+    for (int i = 0; i < 2; ++i) {
+        CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, pingFBO[i]);
+        CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, pingTex[i]);
+        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, nullptr);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        CHECKED_GL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingTex[i], 0);
+        RG_GUARANTEE(glCheckFramebufferStatus(GL_FRAMEBUFFER)==GL_FRAMEBUFFER_COMPLETE, "pingFBO incomplete");
+    }
+
+    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+}
+
+void MSAAHandler::bloom_bright_pass() const {
+    CHECKED_GL_CALL(glDisable, GL_DEPTH_TEST);
+    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, brightFBO);
+    CHECKED_GL_CALL(glViewport, 0, 0, SCR_WIDTH, SCR_HEIGHT);
+    CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
+
+    CHECKED_GL_CALL(glDisable, GL_FRAMEBUFFER_SRGB);
+
+    brightShader->use();
+    brightShader->set_int("hdrTex", 0);
+    brightShader->set_float("threshold", bloomThreshold);
+
+    CHECKED_GL_CALL(glBindVertexArray, quadVAO);
+    CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, screenTexture);
+    CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6);
+}
+
+void MSAAHandler::bloom_blur_passes() {
+    bool horizontal = true;
+    GLuint src = brightTex;
+
+    blurShader->use();
+    blurShader->set_int("image", 0);
+    for (int i = 0; i < blurPasses; i++) {
+        CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, pingFBO[horizontal]);
+        blurShader->set_int("horizontal", horizontal ? 1 : 0);
+
+        CHECKED_GL_CALL(glBindVertexArray, quadVAO);
+        CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
+        CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, src);
+        CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6);
+
+        src = pingTex[horizontal];
+        horizontal = !horizontal;
+    }
+
+    lastBloomTexture = src;
+}
+
 
 void MSAAHandler::msaa_redirect() const {
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, framebuffer);
@@ -105,16 +183,22 @@ void MSAAHandler::msaa_draw() const {
     CHECKED_GL_CALL(glClearColor, 1.0f, 1.0f, 1.0f, 1.0f);
     CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
     CHECKED_GL_CALL(glDisable, GL_DEPTH_TEST);
-
     CHECKED_GL_CALL(glDisable, GL_FRAMEBUFFER_SRGB);
+
     screenShader->use();
+    // set hdr params
     screenShader->set_int("screenTexture", 0);
     screenShader->set_float("exposure", exposure);
     screenShader->set_float("gamma", gamma);
+    // set bloom params
+    screenShader->set_int("bloomTex", 1);
+    screenShader->set_float("bloomIntensity", bloomIntensity);
 
     CHECKED_GL_CALL(glBindVertexArray, quadVAO);
     CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, screenTexture);
+    CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE1);
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, lastBloomTexture);
     CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6);
 }
 }
