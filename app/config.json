@@ -14,8 +14,12 @@
         "flip_uvs": false
       },
       "lamp_post": {
-        "path": "lamp_post.obj",
-        "flip_uvs": false
+        "path": "lamp_post/lamp_post.obj",
+        "flip_uvs": true
+      },
+      "BallAndBox": {
+        "path": "debug/BallAndBox.obj",
+        "flip_uvs": true
       }
     }
   },
