@@ -28,6 +28,7 @@ void MainController::draw() {
     auto bunnyModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
     auto bunny = get<engine::resources::ResourcesController>()->model("bunny");
     auto lampPost = get<engine::resources::ResourcesController>()->model("lamp_post");
+    auto debug = get<engine::resources::ResourcesController>()->model("BallAndBox");
     shader = get<engine::resources::ResourcesController>()->shader("triangle");
     auto graphics_controller = get<GraphicsController>();
 
@@ -55,8 +56,15 @@ void MainController::draw() {
     bunny->draw(shader);
 
     shader->set_mat4("model", lamp_post_model_matrix);
+    shader->set_int("uDiffuseMap", 0);
     lampPost->draw(shader);
+
+    shader->set_mat4("model", glm::mat4(1.0f));
+    shader->set_int("uDiffuseMap", 0);
+    debug->draw(shader);
+
     render_light();
+    render_skybox();
 }
 
 void MainController::update() {
@@ -128,9 +136,17 @@ void MainController::render_light() {
     cube->draw(lightShader);
 }
 
+void MainController::render_skybox() {
+    auto shader = get<engine::resources::ResourcesController>()->shader("skybox");
+    auto skybox_cube = get<engine::resources::ResourcesController>()->skybox("skybox");
+    get<GraphicsController>()->draw_skybox(shader, skybox_cube);
+}
+
 
 void MainController::end_draw() {
     msaa_handler->blit_framebuffer_to_intermediate();
+    msaa_handler->bloom_bright_pass();
+    msaa_handler->bloom_blur_passes();
     msaa_handler->msaa_draw();
     auto platform = get<engine::platform::PlatformController>();
     platform->swap_buffers();

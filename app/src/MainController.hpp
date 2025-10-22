@@ -26,6 +26,7 @@ private:
     void update_camera();
     void update_light();
     void render_light();
+    void render_skybox();
     glm::vec3 light_position;
     glm::vec3 light_color;
     glm::mat4 lamp_post_model_matrix;
