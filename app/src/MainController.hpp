@@ -22,14 +22,15 @@ protected:
     void begin_draw() override;
     void end_draw() override;
     void draw() override;
+    glm::vec2 random_point_in_ring(float center_x, float center_y, float radius_inner, float radius_outer);
+    void generate_leaves_around_tree(float tree_x, float tree_y, int n);
+    void generate_random_leaf_piles(int n);
     void generate_trees(int n);
-    void render_trees();
     void update() override;
 
 private:
     void update_camera();
     void update_light();
-    void render_light();
     void render_skybox();
     std::unique_ptr<Scene> scene;
     std::unique_ptr<engine::graphics::MSAAHandler> msaa_handler;
