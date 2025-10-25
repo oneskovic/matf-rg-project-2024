@@ -34,14 +34,24 @@ uniform sampler2D uDiffuseMap;
 
 uniform float uTile; // tiling factor
 
-uniform vec3 objectColor;
-uniform vec3 ambientColor;
+// ambient light
+uniform vec3 ambientLight;
 
+// directional light
 uniform vec3 dirLightDir;
 uniform vec3 dirLightColor;
 
-uniform vec3 pointLightPos;
-uniform vec3 pointLightColor;
+// point lights
+struct PointLight {
+    vec3 position;
+    vec3 color;
+};
+
+#define MAX_POINT_LIGHTS 16
+uniform int uNumPointLights;
+uniform PointLight uPointLights[MAX_POINT_LIGHTS];
+
+// shared attenuation for all point lights
 uniform float pointKc;
 uniform float pointKl;
 uniform float pointKq;
@@ -49,24 +59,28 @@ uniform float pointKq;
 void main()
 {
     vec3 N = normalize(Normal);
-
     vec3 Ld = normalize(dirLightDir);
     float diffDir = max(dot(N, Ld), 0.0);
     vec3 dirTerm = diffDir * dirLightColor;
 
-    vec3 toPoint = pointLightPos - FragPos;
-    float dist   = length(toPoint);
-    vec3 Lp      = toPoint / max(dist, 1e-6);
-    float diffPt = max(dot(N, Lp), 0.0);
-    float atten  = 1.0 / (pointKc + pointKl * dist + pointKq * dist * dist);
-    vec3 pointTerm = diffPt * pointLightColor * atten;
+    vec3 pointAccum = vec3(0.0); // Total accumulated light
 
-    vec3 lighting = ambientColor + dirTerm + pointTerm;
+    for (int i = 0; i < uNumPointLights; ++i) {
+        vec3 toPoint = uPointLights[i].position - FragPos;
+        float dist   = length(toPoint);
+        vec3 Lp      = toPoint / max(dist, 1e-6);
+
+        float diffPt = max(dot(N, Lp), 0.0);
+
+        float atten  = 1.0 / (pointKc + pointKl * dist + pointKq * dist * dist);
+
+        pointAccum += diffPt * uPointLights[i].color * atten;
+    }
+
+    vec3 lighting = ambientLight + dirTerm + pointAccum;
 
     // Do tiling
     vec2 tiledUV = TexCoords * uTile;
-    vec3 albedo  = texture(uDiffuseMap, tiledUV).rgb * objectColor;
-
-    vec3 color = lighting * albedo;
+    vec3 color = lighting * texture(uDiffuseMap, tiledUV).rgb;
     FragColor = vec4(color, 1.0);
 }

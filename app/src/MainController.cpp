@@ -17,13 +17,12 @@ void MainController::initialize() {
     // Add lights to the scene
     Scene::PointLight point_light = {glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(3.0f, 0.5f, 2.75f)};
     scene->AddLight(point_light);
-    Scene::DirectionalLight directional_light = {glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(-0.2f, -1.0f, -0.3f))};
+    // Scene::PointLight point_light2 = {glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.5f, -2.75f)};
+    // scene->AddLight(point_light2);
+    Scene::DirectionalLight directional_light = {glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(0.5f, 1.0f, 0.5f))};
     scene->AddLight(directional_light);
 
     // Add models to the scene
-    glm::vec3 bunny_pos = glm::vec3(0.0f, 0.0f, -1.0f);
-    auto bunny = get<engine::resources::ResourcesController>()->model("bunny");
-    scene->AddModel({1.0, bunny_pos, bunny});
 
     glm::vec3 lamp_pos = glm::vec3(3.0f,0,3.0f);
     auto lampPost = get<engine::resources::ResourcesController>()->model("lamp_post");
@@ -103,22 +102,22 @@ void MainController::update_camera() {
 void MainController::update_light() {
     auto platform = get<engine::platform::PlatformController>();
     float dt = platform->dt();
-    /*if (platform->key(engine::platform::KEY_UP)
+    if (platform->key(engine::platform::KEY_UP)
                 .state() == engine::platform::Key::State::Pressed) {
-        light_position += glm::vec3(0,0,1)*dt;
+        scene->MoveMovableLight(glm::vec3(0,0,1)*dt);
                 }
     if (platform->key(engine::platform::KEY_DOWN)
                 .state() == engine::platform::Key::State::Pressed) {
-        light_position += glm::vec3(0,0,-1)*dt;
+        scene->MoveMovableLight(glm::vec3(0,0,-1)*dt);
                 }
     if (platform->key(engine::platform::KEY_LEFT)
                 .state() == engine::platform::Key::State::Pressed) {
-        light_position += glm::vec3(1,0,0)*dt;
+        scene->MoveMovableLight(glm::vec3(1,0,0)*dt);
                 }
     if (platform->key(engine::platform::KEY_RIGHT)
                 .state() == engine::platform::Key::State::Pressed) {
-        light_position += glm::vec3(-1,0,0)*dt;
-                }*/
+        scene->MoveMovableLight(glm::vec3(-1,0,0)*dt);
+                }
     //spdlog::info("Light position: {} {} {}", light_position.x, light_position.y, light_position.z);
 }
 
