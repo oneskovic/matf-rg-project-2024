@@ -51,7 +51,7 @@ private:
     static constexpr int MaxPointLights = 16;
 
     PointLight movable_light = {glm::vec3(0.67f, 0.55f, 0.18f), glm::vec3(1.0f,0.5f,0.0f)};
-    AmbientLight ambient_light = {glm::vec3(0.05f, 0.05f, 0.05f)};
+    AmbientLight ambient_light = {glm::vec3(0.01f, 0.01f, 0.01f)};
     std::vector<PointLight> staticPointLights;
     std::vector<DirectionalLight> directionalLights;
     std::vector<Model> models;
