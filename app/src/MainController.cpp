@@ -12,9 +12,27 @@ using namespace engine::graphics;
 
 void MainController::initialize() {
     OpenGL::enable_depth_testing();
-    light_position = glm::vec3(3.0f, 0.5f, 2.75f);
-    light_color = glm::vec3(1.0f, 1.0f, 1.0f);
-    lamp_post_model_matrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(3,0,3)), glm::vec3(0.1,0.1,0.1));
+    scene = std::make_unique<Scene>();
+
+    // Add lights to the scene
+    Scene::PointLight point_light = {glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(3.0f, 0.5f, 2.75f)};
+    scene->AddLight(point_light);
+    Scene::DirectionalLight directional_light = {glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(-0.2f, -1.0f, -0.3f))};
+    scene->AddLight(directional_light);
+
+    // Add models to the scene
+    glm::vec3 bunny_pos = glm::vec3(0.0f, 0.0f, -1.0f);
+    auto bunny = get<engine::resources::ResourcesController>()->model("bunny");
+    scene->AddModel({1.0, bunny_pos, bunny});
+
+    glm::vec3 lamp_pos = glm::vec3(3.0f,0,3.0f);
+    auto lampPost = get<engine::resources::ResourcesController>()->model("lamp_post");
+    scene->AddModel({0.1, lamp_pos, lampPost});
+
+    glm::vec3 ground_pos = glm::vec3(0.0f, 0.0f, 0.0f);
+    auto ground = get<engine::resources::ResourcesController>()->model("ground");
+    scene->AddModel({10.0, ground_pos, ground, 10.0});
+
     msaa_handler = std::make_unique<MSAAHandler>();
     msaa_handler->init_msaa(800, 600);
     rng = std::mt19937(42);
@@ -27,56 +45,12 @@ void MainController::begin_draw() {
 }
 
 void MainController::draw() {
-    auto bunnyModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-    auto bunny = get<engine::resources::ResourcesController>()->model("bunny");
-    auto lampPost = get<engine::resources::ResourcesController>()->model("lamp_post");
-    auto ground = get<engine::resources::ResourcesController>()->model("ground");
-
-    shader = get<engine::resources::ResourcesController>()->shader("triangle");
-    auto graphics_controller = get<GraphicsController>();
-
-    shader->use();
-    shader->set_float("uTile", 1.0f);
-
-    shader->set_mat4("projection", graphics_controller->projection_matrix());
-    shader->set_mat4("view", graphics_controller->camera()->view_matrix());
-
-    shader->set_vec3("objectColor",  glm::vec3(1.0f, 0.5f, 0.3f));
-    shader->set_vec3("ambientColor", glm::vec3(0.05f, 0.05f, 0.05f));
-
-    // Directional light
-    shader->set_vec3("dirLightDir",  glm::normalize(glm::vec3(-0.2f, -1.0f, -0.3f)));
-    shader->set_vec3("dirLightColor",glm::vec3(0.5f, 0.5f, 0.5f));
-
-    // Point light
-    shader->set_vec3("pointLightPos", light_position);
-    shader->set_vec3("pointLightColor", glm::vec3(0.5,0.66,0.2));
-
-    // Attenuation
-    shader->set_float("pointKc", 1.0f);
-    shader->set_float("pointKl", 0.09f);
-    shader->set_float("pointKq", 0.032f);
-
-    shader->set_mat4("model", bunnyModelMatrix);
-    bunny->draw(shader);
-
-    shader->set_mat4("model", lamp_post_model_matrix);
-    shader->set_int("uDiffuseMap", 0);
-    lampPost->draw(shader);
-
-    render_trees();
-
-    shader->set_float("uTile", 12.0f);
-    shader->set_mat4("model", glm::scale(glm::mat4(1.0f), glm::vec3(10.0f, 1.0f, 10.0f)));
-    shader->set_int("uDiffuseMap", 0);
-    ground->draw(shader);
-
-    render_light();
+    scene->RenderModels();
+    scene->RenderLights();
     render_skybox();
 }
 
 void MainController::generate_trees(int n) {
-    trees.reserve(n);
     float min = -5.0f;
     float max = 5.0f;
     int differentTrees = 9;
@@ -90,14 +64,7 @@ void MainController::generate_trees(int n) {
 
         int tree_model_index = dist_type(rng);
         engine::resources::Model *tree_model = get<engine::resources::ResourcesController>()->model("tree" + std::to_string(tree_model_index));
-        trees.push_back({glm::vec3(x,0,z), tree_model});
-    }
-}
-
-void MainController::render_trees() {
-    for (int i = 0; i < trees.size(); i++) {
-        shader->set_mat4("model", glm::translate(glm::mat4(1.0f), trees[i].position));
-        trees[i].model->draw(shader);
+        scene->AddModel({1,glm::vec3(x,0,z), tree_model});
     }
 }
 
@@ -136,7 +103,7 @@ void MainController::update_camera() {
 void MainController::update_light() {
     auto platform = get<engine::platform::PlatformController>();
     float dt = platform->dt();
-    if (platform->key(engine::platform::KEY_UP)
+    /*if (platform->key(engine::platform::KEY_UP)
                 .state() == engine::platform::Key::State::Pressed) {
         light_position += glm::vec3(0,0,1)*dt;
                 }
@@ -151,23 +118,8 @@ void MainController::update_light() {
     if (platform->key(engine::platform::KEY_RIGHT)
                 .state() == engine::platform::Key::State::Pressed) {
         light_position += glm::vec3(-1,0,0)*dt;
-                }
+                }*/
     //spdlog::info("Light position: {} {} {}", light_position.x, light_position.y, light_position.z);
-}
-void MainController::render_light() {
-    auto cube = get<engine::resources::ResourcesController>()->model("cube");
-    auto lightShader = get<engine::resources::ResourcesController>()->shader("light");
-    auto graphics_controller = get<GraphicsController>();
-
-    auto model = glm::translate(glm::mat4(1.0f), light_position);
-    model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
-
-    lightShader->use();
-    lightShader->set_mat4("model", model);
-    lightShader->set_mat4("view", graphics_controller->camera()->view_matrix());
-    lightShader->set_mat4("projection", graphics_controller->projection_matrix());
-    lightShader->set_vec3("lightColor", light_color);
-    cube->draw(lightShader);
 }
 
 void MainController::render_skybox() {
