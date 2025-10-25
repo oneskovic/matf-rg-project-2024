@@ -41,6 +41,26 @@
         "path": "tree/tree9.obj",
         "flip_uvs": true
       },
+      "leaf1": {
+        "path": "leaves/1.obj",
+        "flip_uvs": false
+      },
+      "leaf2": {
+        "path": "leaves/2.obj",
+        "flip_uvs": false
+      },
+      "leaf3": {
+        "path": "leaves/3.obj",
+        "flip_uvs": false
+      },
+      "leaf_group1": {
+        "path": "leaves/leaf_group1.obj",
+        "flip_uvs": false
+      },
+      "leaf_group2": {
+        "path": "leaves/leaf_group2.obj",
+        "flip_uvs": false
+      },
       "bunny": {
         "path": "bunny.obj",
         "flip_uvs": false
