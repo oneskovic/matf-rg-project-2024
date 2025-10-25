@@ -7,39 +7,39 @@
       },
       "tree1": {
         "path": "tree/tree1.obj",
-        "flip_uvs": false
+        "flip_uvs": true
       },
       "tree2": {
         "path": "tree/tree2.obj",
-        "flip_uvs": false
+        "flip_uvs": true
       },
       "tree3": {
         "path": "tree/tree3.obj",
-        "flip_uvs": false
+        "flip_uvs": true
       },
       "tree4": {
         "path": "tree/tree4.obj",
-        "flip_uvs": false
+        "flip_uvs": true
       },
       "tree5": {
         "path": "tree/tree5.obj",
-        "flip_uvs": false
+        "flip_uvs": true
       },
       "tree6": {
         "path": "tree/tree6.obj",
-        "flip_uvs": false
+        "flip_uvs": true
       },
       "tree7": {
         "path": "tree/tree7.obj",
-        "flip_uvs": false
+        "flip_uvs": true
       },
       "tree8": {
         "path": "tree/tree8.obj",
-        "flip_uvs": false
+        "flip_uvs": true
       },
       "tree9": {
         "path": "tree/tree9.obj",
-        "flip_uvs": false
+        "flip_uvs": true
       },
       "bunny": {
         "path": "bunny.obj",
