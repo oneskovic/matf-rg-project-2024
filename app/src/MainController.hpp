@@ -6,9 +6,14 @@
 
 #include <engine/core/Controller.hpp>
 #include <memory>
+#include <random>
 
 class Shader;
-class Model;
+
+struct TreeModel {
+    glm::vec3 position;
+    engine::resources::Model* model;
+};
 
 class MainController final : public engine::core::Controller {
 public:
@@ -20,6 +25,8 @@ protected:
     void begin_draw() override;
     void end_draw() override;
     void draw() override;
+    void generate_trees(int n);
+    void render_trees();
     void update() override;
 
 private:
@@ -33,4 +40,6 @@ private:
     engine::resources::Shader *shader;
     engine::resources::Model *triangle_model;
     std::unique_ptr<engine::graphics::MSAAHandler> msaa_handler;
+    std::vector<TreeModel> trees;
+    std::mt19937 rng;
 };

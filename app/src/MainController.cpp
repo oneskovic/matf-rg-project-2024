@@ -17,6 +17,8 @@ void MainController::initialize() {
     lamp_post_model_matrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(3,0,3)), glm::vec3(0.1,0.1,0.1));
     msaa_handler = std::make_unique<MSAAHandler>();
     msaa_handler->init_msaa(800, 600);
+    rng = std::mt19937(42);
+    generate_trees(10);
 }
 
 void MainController::begin_draw() {
@@ -28,11 +30,14 @@ void MainController::draw() {
     auto bunnyModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
     auto bunny = get<engine::resources::ResourcesController>()->model("bunny");
     auto lampPost = get<engine::resources::ResourcesController>()->model("lamp_post");
-    auto debug = get<engine::resources::ResourcesController>()->model("BallAndBox");
+    auto ground = get<engine::resources::ResourcesController>()->model("ground");
+
     shader = get<engine::resources::ResourcesController>()->shader("triangle");
     auto graphics_controller = get<GraphicsController>();
 
     shader->use();
+    shader->set_float("uTile", 1.0f);
+
     shader->set_mat4("projection", graphics_controller->projection_matrix());
     shader->set_mat4("view", graphics_controller->camera()->view_matrix());
 
@@ -41,11 +46,11 @@ void MainController::draw() {
 
     // Directional light
     shader->set_vec3("dirLightDir",  glm::normalize(glm::vec3(-0.2f, -1.0f, -0.3f)));
-    shader->set_vec3("dirLightColor",glm::vec3(0.2f, 0.2f, 0.2f));
+    shader->set_vec3("dirLightColor",glm::vec3(0.5f, 0.5f, 0.5f));
 
     // Point light
-    shader->set_vec3("pointLightPos",  light_position);
-    shader->set_vec3("pointLightColor", glm::vec3(1.0,0.0,0.0));
+    shader->set_vec3("pointLightPos", light_position);
+    shader->set_vec3("pointLightColor", glm::vec3(0.5,0.66,0.2));
 
     // Attenuation
     shader->set_float("pointKc", 1.0f);
@@ -59,12 +64,41 @@ void MainController::draw() {
     shader->set_int("uDiffuseMap", 0);
     lampPost->draw(shader);
 
-    shader->set_mat4("model", glm::mat4(1.0f));
+    render_trees();
+
+    shader->set_float("uTile", 12.0f);
+    shader->set_mat4("model", glm::scale(glm::mat4(1.0f), glm::vec3(10.0f, 1.0f, 10.0f)));
     shader->set_int("uDiffuseMap", 0);
-    debug->draw(shader);
+    ground->draw(shader);
 
     render_light();
     render_skybox();
+}
+
+void MainController::generate_trees(int n) {
+    trees.reserve(n);
+    float min = -5.0f;
+    float max = 5.0f;
+    int differentTrees = 9;
+
+    std::uniform_real_distribution dist_pos(min, max);
+    std::uniform_int_distribution dist_type(1, differentTrees);
+
+    for (int i = 0; i < n; i++) {
+        float x = dist_pos(rng);
+        float z = dist_pos(rng);
+
+        int tree_model_index = dist_type(rng);
+        engine::resources::Model *tree_model = get<engine::resources::ResourcesController>()->model("tree" + std::to_string(tree_model_index));
+        trees.push_back({glm::vec3(x,0,z), tree_model});
+    }
+}
+
+void MainController::render_trees() {
+    for (int i = 0; i < trees.size(); i++) {
+        shader->set_mat4("model", glm::translate(glm::mat4(1.0f), trees[i].position));
+        trees[i].model->draw(shader);
+    }
 }
 
 void MainController::update() {
@@ -141,7 +175,6 @@ void MainController::render_skybox() {
     auto skybox_cube = get<engine::resources::ResourcesController>()->skybox("skybox");
     get<GraphicsController>()->draw_skybox(shader, skybox_cube);
 }
-
 
 void MainController::end_draw() {
     msaa_handler->blit_framebuffer_to_intermediate();

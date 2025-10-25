@@ -1,8 +1,44 @@
 {
   "resources": {
     "models": {
-      "triangle": {
-        "path": "triangle.obj",
+      "ground": {
+        "path": "ground/ground.obj",
+        "flip_uvs": false
+      },
+      "tree1": {
+        "path": "tree/tree1.obj",
+        "flip_uvs": false
+      },
+      "tree2": {
+        "path": "tree/tree2.obj",
+        "flip_uvs": false
+      },
+      "tree3": {
+        "path": "tree/tree3.obj",
+        "flip_uvs": false
+      },
+      "tree4": {
+        "path": "tree/tree4.obj",
+        "flip_uvs": false
+      },
+      "tree5": {
+        "path": "tree/tree5.obj",
+        "flip_uvs": false
+      },
+      "tree6": {
+        "path": "tree/tree6.obj",
+        "flip_uvs": false
+      },
+      "tree7": {
+        "path": "tree/tree7.obj",
+        "flip_uvs": false
+      },
+      "tree8": {
+        "path": "tree/tree8.obj",
+        "flip_uvs": false
+      },
+      "tree9": {
+        "path": "tree/tree9.obj",
         "flip_uvs": false
       },
       "bunny": {

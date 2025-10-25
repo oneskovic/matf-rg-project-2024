@@ -32,6 +32,8 @@ in vec2 TexCoords;
 
 uniform sampler2D uDiffuseMap;
 
+uniform float uTile; // tiling factor
+
 uniform vec3 objectColor;
 uniform vec3 ambientColor;
 
@@ -61,7 +63,10 @@ void main()
 
     vec3 lighting = ambientColor + dirTerm + pointTerm;
 
-    vec3 color = lighting * texture(uDiffuseMap, TexCoords).rgb;
+    // Do tiling
+    vec2 tiledUV = TexCoords * uTile;
+    vec3 albedo  = texture(uDiffuseMap, tiledUV).rgb * objectColor;
 
+    vec3 color = lighting * albedo;
     FragColor = vec4(color, 1.0);
 }
