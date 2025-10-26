@@ -1,5 +1,6 @@
 #include "MainController.hpp"
 
+#include "AnimationController.h"
 #include "engine/graphics/Camera.hpp"
 #include "engine/graphics/GraphicsController.hpp"
 #include "engine/platform/PlatformController.hpp"
@@ -7,6 +8,7 @@
 #include "spdlog/spdlog.h"
 
 #include <engine/graphics/OpenGL.hpp>
+#include <memory>
 
 using namespace engine::core;
 using namespace engine::graphics;
@@ -26,18 +28,21 @@ void MainController::initialize() {
     // Add models to the scene
 
     glm::vec3 lamp_pos = glm::vec3(3.0f,0,3.0f);
-    auto lampPost = get<engine::resources::ResourcesController>()->model("lamp_post");
-    scene->AddModel({0.1, lamp_pos, lampPost});
+    auto lamp_post_model = get<engine::resources::ResourcesController>()->model("lamp_post");
+    auto lamp_post = std::make_shared<Scene::Model>(0.1, lamp_pos,  lamp_post_model);
+    scene->AddModel(lamp_post);
 
     glm::vec3 ground_pos = glm::vec3(0.0f, -0.01f, 0.0f);
-    auto ground = get<engine::resources::ResourcesController>()->model("ground");
-    scene->AddModel({10.0, ground_pos, ground, 10.0});
+    auto ground_model = get<engine::resources::ResourcesController>()->model("ground");
+    auto ground = std::make_shared<Scene::Model>(10, ground_pos, ground_model, 10);
+    scene->AddModel(ground);
 
     msaa_handler = std::make_unique<MSAAHandler>();
     msaa_handler->init_msaa(800, 600);
     rng = std::mt19937(42);
     generate_trees(10);
     generate_random_leaf_piles(15);
+    make_random_falling_leaves();
 }
 
 void MainController::begin_draw() {
@@ -62,15 +67,43 @@ glm::vec2 MainController::random_point_in_ring(float center_x, float center_y, f
     return point;
 }
 
-void MainController::generate_leaves_around_tree(float tree_x, float tree_z, int n)
-{
+engine::resources::Model *MainController::get_random_leaf_model() {
     int different_leaves = 3;
     std::uniform_int_distribution dist_type(1, different_leaves);
+    int leaf_model_index = dist_type(rng);
+    engine::resources::Model *leaf_model = get<engine::resources::ResourcesController>()->model("leaf" + std::to_string(leaf_model_index));
+    return leaf_model;
+}
+
+void MainController::generate_leaves_around_tree(float tree_x, float tree_z, int n)
+{
     for (int i = 0; i < n; i++) {
         glm::vec2 leaf_pos = random_point_in_ring(tree_x, tree_z, 0.1f, 0.4f);
-        int leaf_model_index = dist_type(rng);
-        engine::resources::Model *leaf_model = get<engine::resources::ResourcesController>()->model("leaf" + std::to_string(leaf_model_index));
-        scene->AddModel({0.1,glm::vec3(leaf_pos.x,0.01f,leaf_pos.y), leaf_model});
+        auto leaf_model = get_random_leaf_model();
+        auto leaf = std::make_shared<Scene::Model>(0.1,glm::vec3(leaf_pos.x,0.01f,leaf_pos.y),  leaf_model);
+        scene->AddModel(leaf);
+    }
+}
+
+void MainController::make_random_falling_leaf(glm::vec3 start_pos) {
+    auto leaf_model = get_random_leaf_model();
+    auto leaf = std::make_shared<Scene::Model>(0.1, start_pos, leaf_model);
+    scene->AddModel(leaf);
+    auto animation_controller = get<AnimationController>();
+    animation_controller->animate_leaf(leaf, rng);
+}
+
+void MainController::make_random_falling_leaves() {
+    int max_per_tree = 15;
+    std::uniform_int_distribution n_leaves_dist(0, max_per_tree);
+    std::uniform_real_distribution start_height_dist(3.0f, 6.0f);
+    for (const auto& tree: trees) {
+        int n = n_leaves_dist(rng);
+        for (int i = 0; i < n; i++) {
+            glm::vec2 start_pos_xz = random_point_in_ring(tree->position.x, tree->position.z, 0.1f, 1.0f);
+            glm::vec3 start_pos = glm::vec3(start_pos_xz.x, start_height_dist(rng), start_pos_xz.y);
+            make_random_falling_leaf(start_pos);
+        }
     }
 }
 
@@ -88,8 +121,7 @@ void MainController::generate_random_leaf_piles(int n) {
 
         int model_index = dist_type(rng);
         engine::resources::Model *model = get<engine::resources::ResourcesController>()->model("leaf_group" + std::to_string(model_index));
-        scene->AddModel({0.1,glm::vec3(x,0.01,z), model});
-
+        auto model_ptr = std::make_shared<Scene::Model>(0.1,glm::vec3(x,0.01,z),  model);
     }
 }
 
@@ -107,7 +139,9 @@ void MainController::generate_trees(int n) {
 
         int tree_model_index = dist_type(rng);
         engine::resources::Model *tree_model = get<engine::resources::ResourcesController>()->model("tree" + std::to_string(tree_model_index));
-        scene->AddModel({1,glm::vec3(x,0,z), tree_model});
+        auto tree = std::make_shared<Scene::Model>(1,glm::vec3(x,0,z),  tree_model);
+        scene->AddModel(tree);
+        trees.push_back(tree);
 
         generate_leaves_around_tree(x,z,30);
     }
@@ -116,6 +150,10 @@ void MainController::generate_trees(int n) {
 void MainController::update() {
     update_camera();
     update_light();
+    std::uniform_real_distribution should_spawn_leaves_dist(0.0f, 1.0f);
+    if (should_spawn_leaves_dist(rng) <= leaf_spawn_prob_per_tick) {
+        make_random_falling_leaves();
+    }
 }
 
 void MainController::update_camera() {

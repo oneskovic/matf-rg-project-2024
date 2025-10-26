@@ -1,11 +1,10 @@
 #include "Scene.h"
 
 #include "engine/graphics/GraphicsController.hpp"
-
 using namespace engine::core;
 using namespace engine::graphics;
 
-void Scene::AddModel(const Model &model) {
+void Scene::AddModel(const std::shared_ptr<Model> &model) {
     models.push_back(model);
 }
 
@@ -27,15 +26,14 @@ void Scene::RenderModels() const {
     engine::resources::Shader * main_shader = SetupMainShader();
 
     for (const auto& model : models) {
-        auto model_matrix =
-            glm::scale(
-                glm::translate(glm::mat4(1.0f), model.position),
-                glm::vec3(model.scale, model.scale, model.scale));
+        auto model_matrix = glm::translate(glm::mat4(1.0f), model->position);
+        model_matrix = model_matrix * model->rotation_mat;
+        model_matrix = glm::scale(model_matrix, glm::vec3(model->scale, model->scale, model->scale));
 
         main_shader->set_mat4("model", model_matrix);
-        main_shader->set_float("uTile", model.textureTileFactor);
+        main_shader->set_float("uTile", model->textureTileFactor);
 
-        model.model->draw(main_shader);
+        model->model->draw(main_shader);
     }
 }
 
