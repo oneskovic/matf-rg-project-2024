@@ -31,8 +31,8 @@ void Scene::RenderModels() const {
         model_matrix = glm::scale(model_matrix, glm::vec3(model->scale, model->scale, model->scale));
 
         main_shader->set_mat4("model", model_matrix);
-        main_shader->set_float("uTile", model->m_texture_tile_factor);
-
+        main_shader->set_float("uTile", model->texture_tile_factor);
+        main_shader->set_bool("useEmissive", model->is_emissive);
         model->model->draw(main_shader);
     }
 }

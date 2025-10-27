@@ -18,8 +18,8 @@ void MainController::initialize() {
     scene = std::make_unique<Scene>();
 
     // Add lights to the scene
-    Scene::PointLight point_light = {glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(3.0f, 0.5f, 2.75f)};
-    scene->AddLight(point_light);
+    // Scene::PointLight point_light = {glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(3.0f, 0.5f, 2.75f)};
+    // scene->AddLight(point_light);
     // Scene::PointLight point_light2 = {glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.5f, -2.75f)};
     // scene->AddLight(point_light2);
     Scene::DirectionalLight directional_light = {glm::vec3(0.5f, 0.5f, 0.5f), glm::normalize(glm::vec3(0.5f, 1.0f, 0.5f))};
@@ -28,13 +28,13 @@ void MainController::initialize() {
     // Add models to the scene
 
     glm::vec3 lamp_pos = glm::vec3(3.0f,0,3.0f);
-    auto lamp_post_model = get<engine::resources::ResourcesController>()->model("lamp_post");
-    auto lamp_post = std::make_shared<engine::resources::SceneModel>(0.1, lamp_pos,  lamp_post_model);
+    auto lamp_post_model = get<ResourcesController>()->model("lamp_post");
+    auto lamp_post = std::make_shared<SceneModel>(0.1, lamp_pos,  lamp_post_model, glm::mat4(1),1,true);
     scene->AddModel(lamp_post);
 
     glm::vec3 ground_pos = glm::vec3(0.0f, -0.01f, 0.0f);
-    auto ground_model = get<engine::resources::ResourcesController>()->model("ground");
-    auto ground = std::make_shared<engine::resources::SceneModel>(10, ground_pos, ground_model, 10);
+    auto ground_model = get<ResourcesController>()->model("ground");
+    auto ground = std::make_shared<SceneModel>(10, ground_pos, ground_model, glm::mat4(1), 10);
     scene->AddModel(ground);
 
     msaa_handler = std::make_unique<MSAAHandler>();
@@ -67,11 +67,11 @@ glm::vec2 MainController::random_point_in_ring(float center_x, float center_y, f
     return point;
 }
 
-engine::resources::Model *MainController::get_random_leaf_model() {
+Model *MainController::get_random_leaf_model() {
     int different_leaves = 3;
     std::uniform_int_distribution dist_type(1, different_leaves);
     int leaf_model_index = dist_type(rng);
-    engine::resources::Model *leaf_model = get<engine::resources::ResourcesController>()->model("leaf" + std::to_string(leaf_model_index));
+    Model *leaf_model = get<ResourcesController>()->model("leaf" + std::to_string(leaf_model_index));
     return leaf_model;
 }
 
@@ -80,14 +80,14 @@ void MainController::generate_leaves_around_tree(float tree_x, float tree_z, int
     for (int i = 0; i < n; i++) {
         glm::vec2 leaf_pos = random_point_in_ring(tree_x, tree_z, 0.1f, 0.4f);
         auto leaf_model = get_random_leaf_model();
-        auto leaf = std::make_shared<engine::resources::SceneModel>(0.1,glm::vec3(leaf_pos.x,0.01f,leaf_pos.y),  leaf_model);
+        auto leaf = std::make_shared<SceneModel>(0.1,glm::vec3(leaf_pos.x,0.01f,leaf_pos.y),  leaf_model);
         scene->AddModel(leaf);
     }
 }
 
 void MainController::make_random_falling_leaf(glm::vec3 start_pos) {
     auto leaf_model = get_random_leaf_model();
-    auto leaf = std::make_shared<engine::resources::SceneModel>(0.1, start_pos, leaf_model);
+    auto leaf = std::make_shared<SceneModel>(0.1, start_pos, leaf_model);
     scene->AddModel(leaf);
     auto animation_controller = get<AnimationController>();
     animation_controller->animate_leaf(leaf, rng);
@@ -120,8 +120,8 @@ void MainController::generate_random_leaf_piles(int n) {
         float z = dist_pos(rng);
 
         int model_index = dist_type(rng);
-        engine::resources::Model *model = get<engine::resources::ResourcesController>()->model("leaf_group" + std::to_string(model_index));
-        auto model_ptr = std::make_shared<engine::resources::SceneModel>(0.1,glm::vec3(x,0.01,z),  model);
+        Model *model = get<ResourcesController>()->model("leaf_group" + std::to_string(model_index));
+        auto model_ptr = std::make_shared<SceneModel>(0.1,glm::vec3(x,0.01,z),  model);
     }
 }
 
@@ -138,8 +138,8 @@ void MainController::generate_trees(int n) {
         float z = dist_pos(rng);
 
         int tree_model_index = dist_type(rng);
-        engine::resources::Model *tree_model = get<engine::resources::ResourcesController>()->model("tree" + std::to_string(tree_model_index));
-        auto tree = std::make_shared<engine::resources::SceneModel>(1,glm::vec3(x,0,z),  tree_model);
+        Model *tree_model = get<ResourcesController>()->model("tree" + std::to_string(tree_model_index));
+        auto tree = std::make_shared<SceneModel>(1,glm::vec3(x,0,z),  tree_model);
         scene->AddModel(tree);
         trees.push_back(tree);
 
@@ -206,8 +206,8 @@ void MainController::update_light() {
 }
 
 void MainController::render_skybox() {
-    auto shader = get<engine::resources::ResourcesController>()->shader("skybox");
-    auto skybox_cube = get<engine::resources::ResourcesController>()->skybox("skybox");
+    auto shader = get<ResourcesController>()->shader("skybox");
+    auto skybox_cube = get<ResourcesController>()->skybox("skybox");
     get<GraphicsController>()->draw_skybox(shader, skybox_cube);
 }
 

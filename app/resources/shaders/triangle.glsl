@@ -30,7 +30,9 @@ in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoords;
 
-uniform sampler2D uDiffuseMap;
+uniform sampler2D texture_diffuse1;
+uniform sampler2D texture_emissive1;
+uniform bool useEmissive;
 
 uniform float uTile; // tiling factor
 
@@ -81,6 +83,9 @@ void main()
 
     // Do tiling
     vec2 tiledUV = TexCoords * uTile;
-    vec3 color = lighting * texture(uDiffuseMap, tiledUV).rgb;
+    vec3 albedo = texture(texture_diffuse1, tiledUV).rgb;
+    vec3 emissive = useEmissive ? texture(texture_emissive1, tiledUV).rgb : vec3(0.0);
+
+    vec3 color = lighting * albedo + 2*emissive;
     FragColor = vec4(color, 1.0);
 }
