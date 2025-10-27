@@ -29,12 +29,12 @@ void MainController::initialize() {
 
     glm::vec3 lamp_pos = glm::vec3(3.0f,0,3.0f);
     auto lamp_post_model = get<engine::resources::ResourcesController>()->model("lamp_post");
-    auto lamp_post = std::make_shared<Scene::Model>(0.1, lamp_pos,  lamp_post_model);
+    auto lamp_post = std::make_shared<engine::resources::SceneModel>(0.1, lamp_pos,  lamp_post_model);
     scene->AddModel(lamp_post);
 
     glm::vec3 ground_pos = glm::vec3(0.0f, -0.01f, 0.0f);
     auto ground_model = get<engine::resources::ResourcesController>()->model("ground");
-    auto ground = std::make_shared<Scene::Model>(10, ground_pos, ground_model, 10);
+    auto ground = std::make_shared<engine::resources::SceneModel>(10, ground_pos, ground_model, 10);
     scene->AddModel(ground);
 
     msaa_handler = std::make_unique<MSAAHandler>();
@@ -80,14 +80,14 @@ void MainController::generate_leaves_around_tree(float tree_x, float tree_z, int
     for (int i = 0; i < n; i++) {
         glm::vec2 leaf_pos = random_point_in_ring(tree_x, tree_z, 0.1f, 0.4f);
         auto leaf_model = get_random_leaf_model();
-        auto leaf = std::make_shared<Scene::Model>(0.1,glm::vec3(leaf_pos.x,0.01f,leaf_pos.y),  leaf_model);
+        auto leaf = std::make_shared<engine::resources::SceneModel>(0.1,glm::vec3(leaf_pos.x,0.01f,leaf_pos.y),  leaf_model);
         scene->AddModel(leaf);
     }
 }
 
 void MainController::make_random_falling_leaf(glm::vec3 start_pos) {
     auto leaf_model = get_random_leaf_model();
-    auto leaf = std::make_shared<Scene::Model>(0.1, start_pos, leaf_model);
+    auto leaf = std::make_shared<engine::resources::SceneModel>(0.1, start_pos, leaf_model);
     scene->AddModel(leaf);
     auto animation_controller = get<AnimationController>();
     animation_controller->animate_leaf(leaf, rng);
@@ -121,7 +121,7 @@ void MainController::generate_random_leaf_piles(int n) {
 
         int model_index = dist_type(rng);
         engine::resources::Model *model = get<engine::resources::ResourcesController>()->model("leaf_group" + std::to_string(model_index));
-        auto model_ptr = std::make_shared<Scene::Model>(0.1,glm::vec3(x,0.01,z),  model);
+        auto model_ptr = std::make_shared<engine::resources::SceneModel>(0.1,glm::vec3(x,0.01,z),  model);
     }
 }
 
@@ -139,7 +139,7 @@ void MainController::generate_trees(int n) {
 
         int tree_model_index = dist_type(rng);
         engine::resources::Model *tree_model = get<engine::resources::ResourcesController>()->model("tree" + std::to_string(tree_model_index));
-        auto tree = std::make_shared<Scene::Model>(1,glm::vec3(x,0,z),  tree_model);
+        auto tree = std::make_shared<engine::resources::SceneModel>(1,glm::vec3(x,0,z),  tree_model);
         scene->AddModel(tree);
         trees.push_back(tree);
 

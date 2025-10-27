@@ -1,8 +1,8 @@
 #pragma once
-#include "engine/resources/Model.hpp"
 #include "glm/vec3.hpp"
 #include "engine/resources/ResourcesController.hpp"
 #include <vector>
+#include <engine/resources/SceneModel.hpp>
 
 class Scene {
 public:
@@ -28,23 +28,7 @@ public:
         glm::vec3 direction;
     };
 
-    class Model {
-    public:
-        Model(float scale, glm::vec3 position, engine::resources::Model* model, glm::mat4 rotation_mat = glm::mat4(1.0f), float textureTileFactor = 1)
-            : scale(scale)
-            , position(position)
-            , rotation_mat(rotation_mat)
-            , model(model),
-            textureTileFactor(textureTileFactor){
-        }
-        float scale;
-        glm::vec3 position;
-        glm::mat4 rotation_mat;
-        engine::resources::Model* model;
-        float textureTileFactor = 1;
-    };
-
-    void AddModel(const std::shared_ptr<Model> &model);
+    void AddModel(const std::shared_ptr<engine::resources::SceneModel> &model);
     void AddLight(const PointLight &light);
     void AddLight(const DirectionalLight &light);
 
@@ -63,7 +47,7 @@ private:
     AmbientLight ambient_light = {glm::vec3(0.01f, 0.01f, 0.01f)};
     std::vector<PointLight> staticPointLights;
     std::vector<DirectionalLight> directionalLights;
-    std::vector<std::shared_ptr<Model>> models;
+    std::vector<std::shared_ptr<engine::resources::SceneModel>> models;
 
     LightAttenuation lightAttenuationParams = {1.0f, 0.09f, 0.032f};
 };

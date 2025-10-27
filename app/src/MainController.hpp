@@ -6,11 +6,7 @@
 #include <engine/core/Controller.hpp>
 #include <memory>
 #include <random>
-
-struct TreeModel {
-    glm::vec3 position;
-    engine::resources::Model* model;
-};
+#include <engine/resources/SceneModel.hpp>
 
 class MainController final : public engine::core::Controller {
 public:
@@ -40,7 +36,7 @@ private:
     std::unique_ptr<Scene> scene;
     std::unique_ptr<engine::graphics::MSAAHandler> msaa_handler;
     std::mt19937 rng;
-    std::vector<std::shared_ptr<Scene::Model>> trees;
+    std::vector<std::shared_ptr<engine::resources::SceneModel>> trees;
 
     // random scene generation params
     float leaf_spawn_prob_per_tick = 0.001;

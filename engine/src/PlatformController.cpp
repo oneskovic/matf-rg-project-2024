@@ -237,6 +237,10 @@ void PlatformController::_platform_on_mouse_button(int button, int action) {
     }
 }
 
+float PlatformController::get_time() {
+    return static_cast<float>(glfwGetTime());
+}
+
 void PlatformController::set_enable_cursor(bool enabled) {
     if (enabled) {
         glfwSetInputMode(m_window.handle_(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);

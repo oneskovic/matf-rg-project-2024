@@ -1,52 +1,52 @@
-
-#include "AnimationController.h"
-
-#include "../../engine/libs/glfw/include/GLFW/glfw3.h"
-#include "glm/detail/type_quat.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
+#include "glm/detail/type_quat.hpp"
 #include "glm/ext/quaternion_trigonometric.hpp"
 #include "glm/gtx/quaternion.hpp"
 #include "spdlog/spdlog.h"
+#include "AnimationController.h"
+
+#include <engine/platform/PlatformController.hpp>
+
 void LeafAnimator::animate(float delta_time) {
-    t += delta_time;
-    if (settled) {
+    m_t += delta_time;
+    if (m_settled) {
         return;
     }
     // We animate a falling leaf using a linear function combined with a sine curve to get a fake swaying effect
 
     float x =
-        start_pos.x
-        + windSpeed * t * windDir.x
-        + swayAmp * std::sin(swayFreq * t + swayPhase);
+        m_start_pos.x
+        + m_wind_speed * m_t * m_wind_dir.x
+        + m_sway_amp * std::sin(m_sway_freq * m_t + m_sway_phase);
 
     float z =
-        start_pos.z
-        + windSpeed * t * windDir.y
-        + swayAmp * std::cos(swayFreq * t + swayPhase);
+        m_start_pos.z
+        + m_wind_speed * m_t * m_wind_dir.y
+        + m_sway_amp * std::cos(m_sway_freq * m_t + m_sway_phase);
 
     // Falling down with variable lift to make it look like the leaf doesn't fall straight down
     float y_raw =
-        start_pos.y
-        - fallSpeed * t
-        - 0.5f * fallAccel * t * t
-        + liftAmp * std::sin(liftFreq * t + liftPhase);
+        m_start_pos.y
+        - m_fall_speed * m_t
+        - 0.5f * m_fall_accel * m_t * m_t
+        + m_lift_amp * std::sin(m_lift_freq * m_t + m_lift_phase);
 
     float groundY = 0.0f;
     if (y_raw <= groundY) {
         y_raw = groundY;
 
         // Damp all rotation when the leaf hits the ground
-        liftAmp       = damp(liftAmp,       0.0f, 2.5f, delta_time);
-        spinRate      = damp(spinRate,      0.0f, 2.5f, delta_time);
-        pitchAmp      = damp(pitchAmp,      0.0f, 2.5f, delta_time);
-        rollAmp       = damp(rollAmp,       0.0f, 2.5f, delta_time);
+        m_lift_amp       = damp(m_lift_amp,       0.0f, 2.5f, delta_time);
+        m_spin_rate      = damp(m_spin_rate,      0.0f, 2.5f, delta_time);
+        m_pitch_amp      = damp(m_pitch_amp,      0.0f, 2.5f, delta_time);
+        m_roll_amp       = damp(m_roll_amp,       0.0f, 2.5f, delta_time);
 
         // once everything is zero mark as settled and don't animate anymore
-        if (almost_zero(spinRate) &&
-            almost_zero(pitchAmp) &&
-            almost_zero(rollAmp))
+        if (almost_zero(m_spin_rate) &&
+            almost_zero(m_pitch_amp) &&
+            almost_zero(m_roll_amp))
         {
-            settled = true;
+            m_settled = true;
         }
     }
 
@@ -54,16 +54,16 @@ void LeafAnimator::animate(float delta_time) {
 
     // Animate rotation around each axis in a similar way
     float yaw =
-        yaw0 +
-        spinRate * t;
+        m_yaw0 +
+        m_spin_rate * m_t;
 
     float pitch =
-        pitchBase +
-        pitchAmp * std::sin(pitchFreq * t + pitchPhase);
+        m_pitch_base +
+        m_pitch_amp * std::sin(m_pitch_freq * m_t + m_pitch_phase);
 
     float roll =
-        rollBase +
-        rollAmp * std::sin(rollFreq * t + rollPhase);
+        m_roll_base +
+        m_roll_amp * std::sin(m_roll_freq * m_t + m_roll_phase);
 
     // Convert to quaternions
     glm::quat qYaw   = glm::angleAxis(yaw,   glm::vec3(0.0f, 1.0f, 0.0f));
@@ -74,9 +74,9 @@ void LeafAnimator::animate(float delta_time) {
 
     // Don't animate position if the leaf is at ground level
     if (!almost_zero(pos.y - groundY)) {
-        model->position = pos;
+        m_model->position = pos;
     }
-    model->rotation_mat = glm::toMat4(qFinal);
+    m_model->rotation_mat = glm::toMat4(qFinal);
 }
 
 float LeafAnimator::damp(float value, float target, float k, float dt) {
@@ -89,17 +89,17 @@ bool LeafAnimator::almost_zero(float v) {
 }
 
 void AnimationController::initialize() {
-    m_last_update_time_seconds = static_cast<float>(glfwGetTime());
+    m_last_update_time_seconds = get<engine::platform::PlatformController>()->get_time();
 }
 void AnimationController::update() {
-    float now = static_cast<float>(glfwGetTime());
+    float now = get<engine::platform::PlatformController>()->get_time();
     float delta_time = now - m_last_update_time_seconds;
-    for (auto& animator : animators) {
+    for (auto& animator : m_animators) {
         animator->animate(delta_time);
     }
     m_last_update_time_seconds = now;
 }
-void AnimationController::animate_leaf(const std::shared_ptr<Scene::Model>& model, std::mt19937& rng) {
+void AnimationController::animate_leaf(const std::shared_ptr<SceneModel>& model, std::mt19937& rng) {
     auto animator = std::make_shared<LeafAnimator>(model, rng);
-    animators.push_back(animator);
+    m_animators.push_back(animator);
 }
