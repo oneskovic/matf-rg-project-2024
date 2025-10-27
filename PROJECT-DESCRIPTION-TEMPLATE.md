@@ -1,39 +1,38 @@
 # {NAME-OF-THE-PROJECT}
 
-{INDEX} - {STUDENT-FULL-NAME}  
-{PROJECT DESCRIPTION}
+mi22009 - Ognjen Nešković  
+An autumn forest scene at night
 
 ## Controls
 
-{BUTTON1} -> {ACTION1}  
-{BUTTON2} -> {ACTION2}  
-...  
-{BUTTONN} -> {ACTIONN}
+W,A,S,D -> Move the camera forward/back/left/right
+Arrow keys -> Move a point light around in the xz plane
+Use the mouse to rotate the camera
 
 ## Features
 
 ### Fundamental:
 
-[ ] Model with lighting
-[ ] Two types of lighting with customizable colors and movement through GUI or ACTIONS
-[ ] {ACTION_X} --- AFTER_M_SECONDS---Triggers---> {EVENT_A} ---> AFTER_N_SECONDS---Triggers---> {EVENT_B}
+[x] Model with lighting
+[x] Two types of lighting with customizable colors and movement through GUI or ACTIONS
+[] {ACTION_X} --- AFTER_M_SECONDS---Triggers---> {EVENT_A} ---> AFTER_N_SECONDS---Triggers---> {EVENT_B}
 
 ### Group A:
 
-[ ] Frame-buffers with post-processing   
+[x] Frame-buffers with post-processing   
 [ ] Instancing  
-[ ] Off-screen Anti-Aliasing  
+[x] Off-screen Anti-Aliasing  
 [ ] Parallax Mapping
 
 ### Group B:
-[ ] Bloom with the use of HDR  
+[x] Bloom with the use of HDR  
 [ ] Deferred Shading  
 [ ] Point Shadows  
 [ ] SSAO
 
 ### Engine improvement:
 
-[ ] ...
+[x] Implement an animation controller to animate the position and rotation of a model using an animation curve defined by a set of parameterized linear - sinusoidal function blends.
 
 ## Models:
 
