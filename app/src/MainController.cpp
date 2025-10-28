@@ -32,6 +32,11 @@ void MainController::initialize() {
     auto lamp_post = std::make_shared<SceneModel>(0.1, lamp_pos,  lamp_post_model, glm::mat4(1),1,true);
     scene->AddModel(lamp_post);
 
+    glm::vec3 lantern_pos = glm::vec3(1.5f,0.2,1.5f);
+    auto lantern_model = get<ResourcesController>()->model("lantern");
+    auto lantern = std::make_shared<SceneModel>(0.3, lantern_pos,  lantern_model, glm::mat4(1),1,true);
+    scene->AddModel(lantern);
+
     glm::vec3 ground_pos = glm::vec3(0.0f, -0.01f, 0.0f);
     auto ground_model = get<ResourcesController>()->model("ground");
     auto ground = std::make_shared<SceneModel>(10, ground_pos, ground_model, glm::mat4(1), 10);
