@@ -34,7 +34,7 @@ void MainController::initialize() {
 
     glm::vec3 lantern_pos = glm::vec3(1.5f,0.2,1.5f);
     auto lantern_model = get<ResourcesController>()->model("lantern");
-    auto lantern = std::make_shared<SceneModel>(0.3, lantern_pos,  lantern_model, glm::mat4(1),1,true);
+    lantern = std::make_shared<SceneModel>(0.3, lantern_pos,  lantern_model, glm::mat4(1),1,true, glm::vec3(0.67f, 0.55f, 0.18f));
     scene->AddModel(lantern);
 
     glm::vec3 ground_pos = glm::vec3(0.0f, -0.01f, 0.0f);
@@ -193,19 +193,19 @@ void MainController::update_light() {
     float dt = platform->dt();
     if (platform->key(engine::platform::KEY_UP)
                 .state() == engine::platform::Key::State::Pressed) {
-        scene->MoveMovableLight(glm::vec3(0,0,1)*dt);
+        lantern->position += glm::vec3(0,0,1)*dt;
                 }
     if (platform->key(engine::platform::KEY_DOWN)
                 .state() == engine::platform::Key::State::Pressed) {
-        scene->MoveMovableLight(glm::vec3(0,0,-1)*dt);
+        lantern->position += glm::vec3(0,0,-1)*dt;
                 }
     if (platform->key(engine::platform::KEY_LEFT)
                 .state() == engine::platform::Key::State::Pressed) {
-        scene->MoveMovableLight(glm::vec3(1,0,0)*dt);
+        lantern->position += glm::vec3(1,0,0)*dt;
                 }
     if (platform->key(engine::platform::KEY_RIGHT)
                 .state() == engine::platform::Key::State::Pressed) {
-        scene->MoveMovableLight(glm::vec3(-1,0,0)*dt);
+        lantern->position += glm::vec3(-1,0,0)*dt;
                 }
     //spdlog::info("Light position: {} {} {}", light_position.x, light_position.y, light_position.z);
 }

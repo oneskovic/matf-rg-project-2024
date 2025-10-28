@@ -18,9 +18,6 @@ void Scene::AddLight(const DirectionalLight &light) {
 void Scene::SetAmbientLight(const AmbientLight &light) {
     ambient_light = light;
 }
-void Scene::MoveMovableLight(const glm::vec3 &position_delta) {
-    movable_light.position += position_delta;
-}
 
 void Scene::RenderModels() const {
     engine::resources::Shader * main_shader = SetupMainShader();
@@ -43,10 +40,12 @@ void Scene::RenderLights() const {
     lightShader->use();
 
     auto cube = Controller::get<engine::resources::ResourcesController>()->model("cube");
-    auto all_point_lights = staticPointLights;
-    all_point_lights.push_back(movable_light);
 
+    auto all_point_lights = GetAllPointLights();
     for (const auto& light : all_point_lights) {
+        if (!light.render_debug_cube) {
+            continue;
+        }
         auto model = glm::translate(glm::mat4(1.0f), light.position);
         model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
 
@@ -57,6 +56,18 @@ void Scene::RenderLights() const {
 
         cube->draw(lightShader);
     }
+}
+
+std::vector<Scene::PointLight> Scene::GetAllPointLights() const {
+    auto all_point_lights = staticPointLights;
+    // A hack to not have to update both the light position and the model position instead someone can move an emissive model and it will move the light as well
+    for (const auto& model : models) {
+        if (model->is_emissive) {
+            PointLight point_light = {model->emissive_color, model->position, false};
+            all_point_lights.push_back(point_light);
+        }
+    }
+    return all_point_lights;
 }
 
 engine::resources::Shader *Scene::SetupMainShader() const {
@@ -81,10 +92,7 @@ engine::resources::Shader *Scene::SetupMainShader() const {
         shader->set_vec3("dirLightColor", glm::vec3(0.0f));
     }
 
-    // point lights
-    auto all_point_lights = staticPointLights;
-    all_point_lights.push_back(movable_light);
-
+    auto all_point_lights = GetAllPointLights();
     int numPointLights = static_cast<int>(all_point_lights.size());
     if (numPointLights > MaxPointLights) {
         throw std::runtime_error("Too many PointLights");

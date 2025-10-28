@@ -22,6 +22,7 @@ public:
 
     struct PointLight : Light {
         glm::vec3 position;
+        bool render_debug_cube = true;
     };
 
     struct DirectionalLight : Light {
@@ -33,17 +34,17 @@ public:
     void AddLight(const DirectionalLight &light);
 
     void SetAmbientLight(const AmbientLight &light);
-    void MoveMovableLight(const glm::vec3 &position_delta);
 
     void RenderModels() const;
     void RenderLights() const;
+
+    std::vector<Scene::PointLight> GetAllPointLights() const;
 
 private:
     engine::resources::Shader * SetupMainShader() const;
 
     static constexpr int MaxPointLights = 16;
 
-    PointLight movable_light = {glm::vec3(0.67f, 0.55f, 0.18f), glm::vec3(1.0f,0.5f,0.0f)};
     AmbientLight ambient_light = {glm::vec3(0.01f, 0.01f, 0.01f)};
     std::vector<PointLight> staticPointLights;
     std::vector<DirectionalLight> directionalLights;

@@ -37,6 +37,7 @@ private:
     std::unique_ptr<engine::graphics::MSAAHandler> msaa_handler;
     std::mt19937 rng;
     std::vector<std::shared_ptr<engine::resources::SceneModel>> trees;
+    std::shared_ptr<engine::resources::SceneModel> lantern;
 
     // random scene generation params
     float leaf_spawn_prob_per_tick = 0.001;
