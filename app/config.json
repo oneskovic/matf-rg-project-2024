@@ -1,6 +1,106 @@
 {
   "resources": {
     "models": {
+      "ground": {
+        "path": "ground/ground.obj",
+        "flip_uvs": false
+      },
+      "tree1": {
+        "path": "tree/tree1.obj",
+        "flip_uvs": true
+      },
+      "tree2": {
+        "path": "tree/tree2.obj",
+        "flip_uvs": true
+      },
+      "tree3": {
+        "path": "tree/tree3.obj",
+        "flip_uvs": true
+      },
+      "tree4": {
+        "path": "tree/tree4.obj",
+        "flip_uvs": true
+      },
+      "tree5": {
+        "path": "tree/tree5.obj",
+        "flip_uvs": true
+      },
+      "tree6": {
+        "path": "tree/tree6.obj",
+        "flip_uvs": true
+      },
+      "tree7": {
+        "path": "tree/tree7.obj",
+        "flip_uvs": true
+      },
+      "tree8": {
+        "path": "tree/tree8.obj",
+        "flip_uvs": true
+      },
+      "tree9": {
+        "path": "tree/tree9.obj",
+        "flip_uvs": true
+      },
+      "leaf1": {
+        "path": "leaves/1.obj",
+        "flip_uvs": false
+      },
+      "leaf2": {
+        "path": "leaves/2.obj",
+        "flip_uvs": false
+      },
+      "leaf3": {
+        "path": "leaves/3.obj",
+        "flip_uvs": false
+      },
+      "leaf_group1": {
+        "path": "leaves/leaf_group1.obj",
+        "flip_uvs": false
+      },
+      "leaf_group2": {
+        "path": "leaves/leaf_group2.obj",
+        "flip_uvs": false
+      },
+      "rock1": {
+        "path": "rocks/rock1.obj",
+        "flip_uvs": false
+      },
+      "rock2": {
+        "path": "rocks/rock2.obj",
+        "flip_uvs": false
+      },
+      "rock3": {
+        "path": "rocks/rock3.obj",
+        "flip_uvs": false
+      },
+      "rock4": {
+        "path": "rocks/rock4.obj",
+        "flip_uvs": false
+      },
+      "rock5": {
+        "path": "rocks/rock5.obj",
+        "flip_uvs": false
+      },
+      "bunny": {
+        "path": "bunny.obj",
+        "flip_uvs": false
+      },
+      "cube": {
+        "path": "cube.obj",
+        "flip_uvs": false
+      },
+      "lamp_post": {
+        "path": "lamp_post/lamp_post.obj",
+        "flip_uvs": true
+      },
+      "tent": {
+        "path": "tent/tent.obj",
+        "flip_uvs": true
+      },
+      "lantern": {
+        "path": "lantern/Lantern.obj",
+        "flip_uvs": true
+      }
     }
   },
   "window": {

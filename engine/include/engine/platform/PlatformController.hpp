@@ -130,6 +130,8 @@ public:
 
     void _platform_on_mouse_button(int button, int action);
 
+    float get_time();
+
 private:
     Key &key_ref(KeyId key);
 

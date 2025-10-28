@@ -1,0 +1,4 @@
+newmtl GroundMaterial
+Kd 1.0 1.0 1.0
+Ka 0.05 0.05 0.05
+map_Kd ground_diffuse.png

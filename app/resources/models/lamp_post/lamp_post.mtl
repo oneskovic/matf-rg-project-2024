@@ -1,0 +1,21 @@
+# Blender 3.3.0 MTL File: 'StylizedLampPost.blend'
+# www.blender.org
+
+newmtl PoleMat
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Pole_Base_Color.png
+map_Ke Pole_Emissive.png
+
+newmtl LampMat
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Lamp_Base_Color.png
+map_Ke Lamp_Emissive.png
