@@ -29,8 +29,13 @@ void MainController::initialize() {
 
     glm::vec3 lamp_pos = glm::vec3(3.0f,0,3.0f);
     auto lamp_post_model = get<ResourcesController>()->model("lamp_post");
-    auto lamp_post = std::make_shared<SceneModel>(0.1, lamp_pos,  lamp_post_model, glm::mat4(1),1,true);
+    auto lamp_post = std::make_shared<SceneModel>(0.1, lamp_pos,  lamp_post_model, glm::mat4(1),1,true, glm::vec3(0.67f, 0.55f, 0.18f));
     scene->AddModel(lamp_post);
+
+    glm::vec3 tent_pos = glm::vec3(2.0f,0,2.0f);
+    auto tent_model = get<ResourcesController>()->model("tent");
+    auto tent = std::make_shared<SceneModel>(0.25, tent_pos,  tent_model, glm::mat4(1),1,false);
+    scene->AddModel(tent);
 
     glm::vec3 lantern_pos = glm::vec3(1.5f,0.2,1.5f);
     auto lantern_model = get<ResourcesController>()->model("lantern");
@@ -45,9 +50,14 @@ void MainController::initialize() {
     msaa_handler = std::make_unique<MSAAHandler>();
     msaa_handler->init_msaa(800, 600);
     rng = std::mt19937(42);
-    generate_trees(10);
-    generate_random_leaf_piles(15);
+    generate_trees(tree_count);
+    generate_rocks(rock_count);
+    generate_random_leaf_piles(leaf_pile_count);
     make_random_falling_leaves();
+
+    // Setup the camera
+    auto camera = get<GraphicsController>()->camera();
+    camera->Position = glm::vec3(1.67, 0.6, 4);
 }
 
 void MainController::begin_draw() {
@@ -99,8 +109,7 @@ void MainController::make_random_falling_leaf(glm::vec3 start_pos) {
 }
 
 void MainController::make_random_falling_leaves() {
-    int max_per_tree = 15;
-    std::uniform_int_distribution n_leaves_dist(0, max_per_tree);
+    std::uniform_int_distribution n_leaves_dist(0, max_leaves_per_tree);
     std::uniform_real_distribution start_height_dist(3.0f, 6.0f);
     for (const auto& tree: trees) {
         int n = n_leaves_dist(rng);
@@ -131,11 +140,9 @@ void MainController::generate_random_leaf_piles(int n) {
 }
 
 void MainController::generate_trees(int n) {
-    float min = -5.0f;
-    float max = 5.0f;
     int differentTrees = 9;
 
-    std::uniform_real_distribution dist_pos(min, max);
+    std::uniform_real_distribution dist_pos(object_min_pos, object_max_pos);
     std::uniform_int_distribution dist_type(1, differentTrees);
 
     for (int i = 0; i < n; i++) {
@@ -149,6 +156,23 @@ void MainController::generate_trees(int n) {
         trees.push_back(tree);
 
         generate_leaves_around_tree(x,z,30);
+    }
+}
+
+void MainController::generate_rocks(int n) {
+    int differentRocks = 5;
+
+    std::uniform_real_distribution dist_pos(object_min_pos, object_max_pos);
+    std::uniform_int_distribution dist_type(1, differentRocks);
+
+    for (int i = 0; i < n; i++) {
+        float x = dist_pos(rng);
+        float z = dist_pos(rng);
+
+        int rock_model_index = dist_type(rng);
+        Model *model = get<ResourcesController>()->model("rock" + std::to_string(rock_model_index));
+        auto rock = std::make_shared<SceneModel>(1,glm::vec3(x,0,z),  model);
+        scene->AddModel(rock);
     }
 }
 
@@ -187,6 +211,7 @@ void MainController::update_camera() {
     float dy = std::clamp(mouse.dy, -10.0f, 10.0f);
     camera->rotate_camera(dx, dy);
     camera->zoom(mouse.scroll);
+    spdlog::info("{} {} {}",camera->Position.x,camera->Position.y,camera->Position.z);
 }
 void MainController::update_light() {
     auto platform = get<engine::platform::PlatformController>();

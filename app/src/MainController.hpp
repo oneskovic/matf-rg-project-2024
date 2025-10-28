@@ -18,13 +18,16 @@ protected:
     void begin_draw() override;
     void end_draw() override;
     void draw() override;
+
+
+    void update() override;
+
+private:
     glm::vec2 random_point_in_ring(float center_x, float center_y, float radius_inner, float radius_outer);
     engine::resources::Model *get_random_leaf_model();
 
     void generate_trees(int n);
-    void update() override;
-
-private:
+    void generate_rocks(int n);
     void generate_leaves_around_tree(float tree_x, float tree_y, int n);
     void generate_random_leaf_piles(int n);
     void make_random_falling_leaf(glm::vec3 start_pos);
@@ -41,4 +44,10 @@ private:
 
     // random scene generation params
     float leaf_spawn_prob_per_tick = 0.001;
+    int tree_count = 30;
+    int leaf_pile_count = 15;
+    int max_leaves_per_tree = 10;
+    double object_max_pos = 8;
+    double object_min_pos = -8;
+    int rock_count = 30;
 };

@@ -61,6 +61,26 @@
         "path": "leaves/leaf_group2.obj",
         "flip_uvs": false
       },
+      "rock1": {
+        "path": "rocks/rock1.obj",
+        "flip_uvs": false
+      },
+      "rock2": {
+        "path": "rocks/rock2.obj",
+        "flip_uvs": false
+      },
+      "rock3": {
+        "path": "rocks/rock3.obj",
+        "flip_uvs": false
+      },
+      "rock4": {
+        "path": "rocks/rock4.obj",
+        "flip_uvs": false
+      },
+      "rock5": {
+        "path": "rocks/rock5.obj",
+        "flip_uvs": false
+      },
       "bunny": {
         "path": "bunny.obj",
         "flip_uvs": false
@@ -71,6 +91,10 @@
       },
       "lamp_post": {
         "path": "lamp_post/lamp_post.obj",
+        "flip_uvs": true
+      },
+      "tent": {
+        "path": "tent/tent.obj",
         "flip_uvs": true
       },
       "lantern": {
