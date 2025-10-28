@@ -211,7 +211,6 @@ void MainController::update_camera() {
     float dy = std::clamp(mouse.dy, -10.0f, 10.0f);
     camera->rotate_camera(dx, dy);
     camera->zoom(mouse.scroll);
-    spdlog::info("{} {} {}",camera->Position.x,camera->Position.y,camera->Position.z);
 }
 void MainController::update_light() {
     auto platform = get<engine::platform::PlatformController>();
@@ -232,7 +231,6 @@ void MainController::update_light() {
                 .state() == engine::platform::Key::State::Pressed) {
         lantern->position += glm::vec3(-1,0,0)*dt;
                 }
-    //spdlog::info("Light position: {} {} {}", light_position.x, light_position.y, light_position.z);
 }
 
 void MainController::render_skybox() {

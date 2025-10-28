@@ -100,10 +100,6 @@
       "lantern": {
         "path": "lantern/Lantern.obj",
         "flip_uvs": true
-      },
-      "BallAndBox": {
-        "path": "debug/BallAndBox.obj",
-        "flip_uvs": true
       }
     }
   },

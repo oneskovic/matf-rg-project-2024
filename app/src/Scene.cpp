@@ -71,7 +71,7 @@ std::vector<Scene::PointLight> Scene::GetAllPointLights() const {
 }
 
 engine::resources::Shader *Scene::SetupMainShader() const {
-    auto shader = Controller::get<engine::resources::ResourcesController>()->shader("triangle");
+    auto shader = Controller::get<engine::resources::ResourcesController>()->shader("main");
     auto graphics_controller = Controller::get<GraphicsController>();
 
     shader->use();
